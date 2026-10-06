@@ -1,5 +1,3 @@
-<!doctype html> <html lang="en"> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"> <title>Huntsville Fresh Food Directory</title> <script> try { var t = localStorage.getItem("hsv-theme"); if (t === "light" || t === "dark") docume
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -181,6 +179,7 @@
       <a href="#produce" class="btn shrink-0 inline-flex items-center px-2 lg:px-3 underline underline-offset-4">Benefits</a>
       <a href="#menus" class="btn shrink-0 inline-flex items-center px-2 lg:px-3 underline underline-offset-4">Fall menus</a>
       <a href="#recipes" class="btn shrink-0 inline-flex items-center px-2 lg:px-3 underline underline-offset-4">Recipes</a>
+      <a href="#dressings" class="btn shrink-0 inline-flex items-center px-2 lg:px-3 underline underline-offset-4">Dressings</a>
       <a href="#grow" class="btn shrink-0 inline-flex items-center px-2 lg:px-3 underline underline-offset-4">Grow kale</a>
       <a href="#group" class="btn shrink-0 inline-flex items-center px-2 lg:px-3 underline underline-offset-4">Garden groups</a>
     </nav>
@@ -222,8 +221,8 @@
  
   <!-- ============ Recipes ============ -->
   <section id="recipes" class="mx-auto max-w-7xl px-4 sm:px-8 pt-14 pb-6 scroll-mt-28 lg:scroll-mt-14">
-    <h2 class="font-display text-3xl sm:text-4xl border-l-8 border-sun pl-3">Pumpkin, sweet potato and kale recipes</h2>
-    <p class="mt-2 text-muted max-w-2xl">Raw, baked, or lightly cooked. Each way of cooking has something going for it: raw keeps all the vitamin C, roasting brings out sweetness, and a quick steam or sauté keeps vegetables bright with little effort.</p>
+    <h2 class="font-display text-3xl sm:text-4xl border-l-8 border-sun pl-3">Fall recipes, cooked and raw</h2>
+    <p class="mt-2 text-muted max-w-2xl">Raw, baked, or lightly cooked. Each way of cooking has something going for it: raw keeps all the vitamin C, roasting brings out sweetness, and a quick steam or sauté keeps vegetables bright with little effort. Apples come from local orchards this time of year; bananas and mangoes don't grow in North Alabama, so pick those up at the grocery store. Every raw recipe is vegan and uses six ingredients or fewer.</p>
  
     <div class="mt-6 rounded-xl bg-card border border-line p-4 grid gap-3 sm:flex sm:flex-wrap sm:items-end sm:gap-6">
       <fieldset>
@@ -237,6 +236,36 @@
     </div>
     <p class="mt-4 text-sm text-muted" id="recipeCount" aria-live="polite"></p>
     <div id="recipeGrid" class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
+  </section>
+
+  <!-- ============ Dressings ============ -->
+  <section id="dressings" class="mx-auto max-w-7xl px-4 sm:px-8 pt-14 pb-6 scroll-mt-28 lg:scroll-mt-14">
+    <h2 class="font-display text-3xl sm:text-4xl border-l-8 border-sun pl-3">Make your own dressing</h2>
+    <p class="mt-2 text-muted max-w-2xl">A jar, five minutes, and simple ingredients. All of them are vegan, and seven use no oil at all: tahini, plant yogurt, avocado, nut butter, or blended fruit makes them creamy instead. Shake, taste on a leaf, and adjust.</p>
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)] lg:items-start">
+      <div class="rounded-2xl bg-card border-2 border-line p-5 sm:p-6">
+        <h3 class="font-display text-2xl">Build any dressing</h3>
+        <p class="mt-1 text-muted">Five parts, in this order. Taste after each one.</p>
+        <ol class="steps mt-5 grid gap-4" id="buildSteps"></ol>
+      </div>
+      <div class="min-w-0">
+        <fieldset>
+          <legend class="text-sm font-semibold mb-1">Oil</legend>
+          <div class="flex flex-wrap rounded-lg border border-line overflow-hidden" id="dressingBtns"></div>
+        </fieldset>
+        <p class="mt-4 text-sm text-muted" id="dressingCount" aria-live="polite"></p>
+        <div id="dressingGrid" class="mt-3 grid gap-3 sm:grid-cols-2"></div>
+      </div>
+    </div>
+
+    <h3 class="mt-12 font-display text-2xl">Herbs and what they go with</h3>
+    <p class="mt-1 text-muted max-w-2xl">Use about 1 tablespoon chopped fresh herbs per 1/2 cup of dressing. Dried herbs are stronger, so use 1 teaspoon in place of each tablespoon of fresh.</p>
+    <div id="herbGrid" class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4"></div>
+
+    <h3 class="mt-12 font-display text-2xl">Key blends to mix ahead</h3>
+    <p class="mt-1 text-muted max-w-2xl">Stir the dried blends together in a small jar and keep them in a dark cupboard for up to six months. Mix the fresh one the day you use it.</p>
+    <div id="blendGrid" class="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3"></div>
   </section>
  
   
@@ -619,6 +648,12 @@ const PLACES = parseCSV(CSV).map((r, i) => {
 const NOW = new Date(), THIS_MONTH = NOW.getMonth(), TODAY = NOW.getDay();
  
 /* ---------- Small pieces of UI ---------- */
+/* Photo slot for recipes and dressings: set img to an image URL (e.g. "images/mango-salsa.jpg")
+   to show a photo. null shows nothing, and an image that fails to load is removed. */
+function imgBlock(item, cls) {
+  if (!item.img) return "";
+  return `<span data-imgwrap class="block overflow-hidden aspect-[16/10] bg-sprout ${cls}"><img src="${esc(item.img)}" alt="${esc(item.name)}" loading="lazy" class="block w-full h-full object-cover" onerror="this.parentNode.remove()"></span>`;
+}
 function dot(color, size = 12) {
   return `<span aria-hidden="true" class="inline-block rounded-full shrink-0" style="width:${size}px;height:${size}px;background:${color};box-shadow:0 0 0 1.5px rgba(255,255,255,.85)"></span>`;
 }
@@ -789,83 +824,86 @@ document.getElementById("produceGrid").innerHTML = PRODUCE.map(p => {
    Fall recipes: pumpkin, sweet potato, and kale
    method: raw | baked | light
    ================================================================== */
-const METHODS = { raw: "Raw & no-cook", baked: "Baked & roasted", light: "Lightly cooked" };
+const METHODS = { raw: "Raw & vegan", baked: "Baked & roasted", light: "Lightly cooked" };
 const MAINS = {
   pumpkin: { name: "Pumpkin", color: "#e07b24", produce: "pumpkin" },
   sweetpotato: { name: "Sweet potato", color: "#b5562a", produce: "sweetpotatoes" },
-  kale: { name: "Kale", color: "#2f6b3c", produce: "kale" }
+  kale: { name: "Kale", color: "#2f6b3c", produce: "kale" },
+  applecarrot: { name: "Apple & carrot", color: "#c2362f", produce: "apples" },
+  tropical: { name: "Banana & mango", color: "#e0a419", produce: null }
 };
+/* img: set to an image URL to show a photo on the card and popup; leave null for none. */
 const RECIPES = [
   /* ----- Raw & no-cook ----- */
-  { id: "pumpkin-apple-salad", name: "Shaved pumpkin and apple salad", main: "pumpkin", method: "raw", time: "15 min", serves: "4",
-    blurb: "Thin ribbons of raw pumpkin soften in a lemony dressing. Crisp, sweet, and a surprise to most people.",
-    ingredients: ["2 cups peeled raw pie pumpkin (or butternut squash), shaved into ribbons with a vegetable peeler", "1 crisp apple, thinly sliced", "2 cups baby kale or arugula", "1/4 cup toasted pumpkin seeds", "2 tbsp lemon juice", "2 tbsp olive oil", "1 tsp honey", "Pinch of salt and pepper"],
-    steps: ["Halve the pumpkin, scoop out the seeds (save them for toasting), and cut away the skin with a sharp knife.", "Run a vegetable peeler down the flesh to make long ribbons.", "Whisk the lemon juice, olive oil, honey, salt, and pepper in a large bowl.", "Toss the pumpkin in the dressing and let it sit 10 minutes to soften.", "Add the apple, greens, and seeds, toss, and serve."],
-    why: "Raw pumpkin keeps all of its vitamin C, which heat breaks down. The olive oil helps your body absorb the beta-carotene.",
+  { id: "pumpkin-apple-salad", img: null, name: "Shaved pumpkin and apple salad", main: "pumpkin", method: "raw", time: "15 min", serves: "4",
+    blurb: "Thin ribbons of raw pumpkin soften in lemon juice. Crisp, sweet, and a surprise to most people.",
+    ingredients: ["2 cups raw pie pumpkin (or butternut squash), peeled and shaved into ribbons", "1 crisp apple, thinly sliced", "2 cups baby kale or arugula", "1/4 cup pumpkin seeds", "Juice of 1 lemon", "1 tsp maple syrup and a pinch of salt"],
+    steps: ["Shave the peeled pumpkin into ribbons with a vegetable peeler.", "Toss with the lemon, maple syrup, and salt, and let it sit 10 minutes to soften.", "Add the apple, greens, and seeds and toss."],
+    why: "Raw pumpkin keeps all of its vitamin C, which heat breaks down. The fat in the pumpkin seeds helps your body absorb the beta-carotene.",
     tip: "Use a small sugar or pie pumpkin. Carving pumpkins are stringy and bland." },
-  { id: "pumpkin-carrot-ginger", name: "Grated pumpkin, carrot and ginger salad", main: "pumpkin", method: "raw", time: "10 min", serves: "4",
-    blurb: "Two orange vegetables, a bright ginger dressing, and no stove at all.",
-    ingredients: ["1 1/2 cups grated raw pumpkin", "1 1/2 cups grated carrot", "1 tbsp grated fresh ginger", "1/4 cup raisins or chopped dates", "2 tbsp orange juice", "1 tbsp rice vinegar or lemon juice", "1 tbsp olive or sesame oil", "Pinch of salt"],
-    steps: ["Grate the peeled pumpkin and the carrots on the large holes of a box grater.", "Whisk the orange juice, vinegar, oil, ginger, and salt.", "Toss everything with the raisins and chill 15 minutes before serving."],
+  { id: "pumpkin-carrot-ginger", img: null, name: "Grated pumpkin, carrot and ginger salad", main: "pumpkin", method: "raw", time: "10 min", serves: "4",
+    blurb: "Two orange vegetables, orange juice, and fresh ginger. No stove at all.",
+    ingredients: ["1 1/2 cups grated raw pumpkin", "1 1/2 cups grated carrot", "1 tbsp grated fresh ginger", "1/4 cup raisins", "Juice of 1 orange", "Pinch of salt"],
+    steps: ["Grate the peeled pumpkin and the carrots on the large holes of a box grater.", "Toss everything together and chill 15 minutes."],
     why: "Pumpkin and carrots together make a big dose of beta-carotene, the building block of vitamin A.",
     tip: "Keeps 2 days in the fridge, so it's a good packed lunch." },
-  { id: "sweet-potato-kale-slaw", name: "Raw sweet potato and kale slaw", main: "sweetpotato", method: "raw", time: "15 min", serves: "4 to 6",
-    blurb: "Raw sweet potato is crisp like a carrot. With kale, apple, and a tangy dressing, it's a slaw that holds up for hours.",
-    ingredients: ["1 medium sweet potato, peeled and cut into thin matchsticks or grated", "3 cups kale, stems removed, thinly sliced", "1 apple, cut in matchsticks", "1/4 cup chopped pecans", "3 tbsp plain yogurt or mayonnaise", "1 tbsp apple cider vinegar", "1 tsp honey", "1 tsp Dijon mustard", "Salt to taste"],
-    steps: ["Rub the sliced kale with a pinch of salt for about a minute until it softens.", "Add the sweet potato and apple.", "Whisk the yogurt, vinegar, honey, mustard, and salt, then toss with the slaw.", "Top with pecans just before serving."],
-    why: "Sweet potato brings fiber and beta-carotene, and kale adds vitamin K and calcium.",
+  { id: "sweet-potato-kale-slaw", img: null, name: "Raw sweet potato and kale slaw", main: "sweetpotato", method: "raw", time: "15 min", serves: "4 to 6",
+    blurb: "Raw sweet potato is crisp like a carrot. With kale, apple, and a tangy tahini dressing, it holds up for hours.",
+    ingredients: ["1 medium sweet potato, peeled and grated or cut in thin matchsticks", "3 cups kale, stems removed, thinly sliced", "1 apple, cut in matchsticks", "1/4 cup chopped pecans", "2 tbsp tahini", "2 tbsp apple cider vinegar plus 1 tsp maple syrup"],
+    steps: ["Squeeze the sliced kale with a pinch of salt for a minute until it softens.", "Whisk the tahini, vinegar, maple syrup, and 2 tbsp water.", "Toss everything together and top with pecans."],
+    why: "Sweet potato brings fiber and beta-carotene, and kale and tahini add calcium.",
     tip: "Raw sweet potato is safe to eat, but it's dense and starchy. Cut it thin and keep portions modest if your stomach is sensitive." },
-  { id: "sweet-potato-coins", name: "Sweet potato coins with peanut-lime dip", main: "sweetpotato", method: "raw", time: "10 min", serves: "4 as a snack",
+  { id: "sweet-potato-coins", img: null, name: "Sweet potato coins with peanut-lime dip", main: "sweetpotato", method: "raw", time: "10 min", serves: "4 as a snack",
     blurb: "Paper-thin raw sweet potato with a salty, tangy dip. A crunchy stand-in for chips.",
-    ingredients: ["1 small sweet potato, peeled and sliced into very thin coins", "1/4 cup peanut butter", "2 tbsp lime juice", "1 tbsp soy sauce", "1 tsp honey", "2 to 3 tbsp warm water", "Pinch of chili flakes"],
-    steps: ["Slice the sweet potato as thin as you can with a sharp knife or a mandoline (use the hand guard).", "Soak the slices in ice water for 10 minutes for extra crunch, then pat dry.", "Whisk the peanut butter, lime juice, soy sauce, honey, and chili flakes, adding warm water until it's dippable."],
-    why: "A fiber-rich snack, and the peanut butter adds protein and healthy fat to keep you full.",
+    ingredients: ["1 small sweet potato, peeled and sliced into very thin coins", "1/4 cup peanut butter", "2 tbsp lime juice", "1 tbsp soy sauce", "1 tsp maple syrup", "2 to 3 tbsp warm water"],
+    steps: ["Slice the sweet potato as thin as you can (use the hand guard on a mandoline).", "Whisk the peanut butter, lime, soy sauce, and maple syrup, adding warm water until it's dippable."],
+    why: "A fiber-rich snack, and peanut butter adds protein and healthy fat to keep you full.",
     tip: "The same dip works with apple slices, bell pepper strips, or kale leaves." },
-  { id: "massaged-kale", name: "Massaged kale salad with apple and pepitas", main: "kale", method: "raw", time: "10 min", serves: "4",
+  { id: "massaged-kale", img: null, name: "Massaged kale salad with apple and pepitas", main: "kale", method: "raw", time: "10 min", serves: "4",
     blurb: "Two minutes of rubbing turns tough kale tender. The best way to win over kale skeptics.",
-    ingredients: ["1 bunch kale (about 6 cups chopped), stems removed", "1 tbsp olive oil", "1 tbsp lemon juice", "Pinch of salt", "1 apple, diced", "1/4 cup dried cranberries", "1/4 cup pumpkin seeds", "1 oz shaved Parmesan or crumbled feta (optional)"],
-    steps: ["Tear the leaves into bite-size pieces in a big bowl.", "Add the oil, lemon juice, and salt.", "Squeeze and rub the kale with your hands for 2 to 3 minutes, until it turns darker and shrinks by about a third.", "Toss in the apple, cranberries, seeds, and cheese."],
+    ingredients: ["1 bunch kale (about 6 cups), stems removed, torn small", "Juice of 1 lemon", "1 tbsp tahini or olive oil", "Pinch of salt", "1 apple, diced", "1/4 cup each dried cranberries and pumpkin seeds"],
+    steps: ["Put the kale, lemon, tahini, and salt in a big bowl.", "Squeeze and rub with your hands for 2 minutes, until the kale darkens and shrinks by a third.", "Toss in the apple, cranberries, and seeds."],
     why: "Massaging breaks down the tough fibers, so raw kale is tender and keeps all of its vitamin C.",
     tip: "Unlike lettuce, dressed kale keeps a day or two, which makes it perfect for a potluck." },
-  { id: "pumpkin-overnight-oats", name: "Pumpkin pie overnight oats", main: "pumpkin", method: "raw", time: "5 min + overnight", serves: "2",
-    blurb: "Stir it in a jar at night, eat it cold (or warmed) in the morning. Tastes like pie, eats like breakfast.",
-    ingredients: ["1 cup rolled oats", "1/2 cup pumpkin puree (canned or homemade)", "1 cup milk or unsweetened plant milk", "1/4 cup plain Greek yogurt", "1 tbsp maple syrup", "1 tsp pumpkin pie spice", "1 tbsp chia seeds (optional)", "Chopped pecans for topping"],
-    steps: ["Stir everything except the pecans in a jar or bowl.", "Cover and refrigerate overnight, or at least 4 hours.", "Top with pecans and eat cold, or microwave for a minute."],
-    why: "Oats bring soluble fiber, pumpkin brings vitamin A, and yogurt adds protein that carries you to lunch.",
+  { id: "pumpkin-overnight-oats", img: null, name: "Pumpkin pie overnight oats", main: "pumpkin", method: "raw", time: "5 min + overnight", serves: "2",
+    blurb: "Stir it in a jar at night and eat it in the morning. Tastes like pie, eats like breakfast.",
+    ingredients: ["1 cup rolled oats", "1/2 cup pumpkin puree", "1 1/4 cups unsweetened soy or oat milk", "1 tbsp maple syrup", "1 tsp pumpkin pie spice", "Chopped pecans for topping"],
+    steps: ["Stir everything except the pecans in a jar.", "Refrigerate overnight, then top with pecans."],
+    why: "Oats bring soluble fiber, pumpkin brings vitamin A, and soy milk adds protein to carry you to lunch.",
     tip: "Freeze leftover puree in 1/2-cup portions in a muffin tin, then pop them into a freezer bag." },
  
   /* ----- Baked & roasted ----- */
-  { id: "sweet-potato-wedges", name: "Roasted sweet potato wedges", main: "sweetpotato", method: "baked", time: "35 min", serves: "4",
+  { id: "sweet-potato-wedges", img: null, name: "Roasted sweet potato wedges", main: "sweetpotato", method: "baked", time: "35 min", serves: "4",
     blurb: "Smoky, caramelized edges and soft centers. Skin on, no peeling.",
     ingredients: ["2 large sweet potatoes, scrubbed, skin on", "2 tbsp olive oil", "1 tsp smoked paprika", "1/2 tsp garlic powder", "1/2 tsp salt"],
     steps: ["Heat the oven to 425°F.", "Cut the sweet potatoes into wedges about 1/2 inch thick.", "Toss with the oil and seasonings.", "Spread in a single layer with space between pieces.", "Roast 25 to 30 minutes, flipping halfway, until browned at the edges."],
     why: "Leaving the skin on adds fiber and potassium.",
     tip: "A crowded pan steams instead of roasts. Use two pans if you need to." },
-  { id: "sweet-potato-bar", name: "Baked sweet potato bar", main: "sweetpotato", method: "baked", time: "1 hr, mostly hands-off", serves: "6 to 8",
+  { id: "sweet-potato-bar", img: null, name: "Baked sweet potato bar", main: "sweetpotato", method: "baked", time: "1 hr, mostly hands-off", serves: "6 to 8",
     blurb: "Bake a pan of potatoes, set out toppings, and let everyone build their own. Made for groups.",
     ingredients: ["1 medium sweet potato per person", "Toppings: black beans, sautéed kale, plain Greek yogurt, salsa, shredded cheese, chopped pecans, cinnamon, honey, sliced green onions"],
     steps: ["Heat the oven to 400°F and line a baking sheet with foil or parchment.", "Scrub the potatoes and poke each one a few times with a fork.", "Bake 45 to 60 minutes, until a knife slides in with no resistance.", "Split them open and fluff the insides with a fork.", "Set the toppings out in bowls and let everyone build their own."],
     why: "A medium baked sweet potato gives more than a full day's vitamin A and about 4 grams of fiber.",
     tip: "Line the pan. The natural sugars drip out and turn to sticky caramel." },
-  { id: "roasted-pumpkin", name: "Roasted pumpkin with sage and garlic", main: "pumpkin", method: "baked", time: "40 min", serves: "4",
+  { id: "roasted-pumpkin", img: null, name: "Roasted pumpkin with sage and garlic", main: "pumpkin", method: "baked", time: "40 min", serves: "4",
     blurb: "Sweet, savory cubes that go with everything from rice bowls to pasta.",
     ingredients: ["1 small pie pumpkin (about 2 lb), peeled, seeded, cut in 1-inch cubes", "2 tbsp olive oil", "3 garlic cloves, smashed", "6 to 8 fresh sage leaves (or 1 tsp dried)", "Salt and pepper"],
     steps: ["Heat the oven to 425°F.", "Toss the pumpkin with oil, garlic, sage, salt, and pepper.", "Roast 25 to 30 minutes, stirring once, until tender and browned at the edges."],
     why: "Roasting concentrates the sweetness, and the oil helps you absorb beta-carotene.",
     tip: "Easier peeling: microwave the whole pumpkin for 2 to 3 minutes to soften the skin first." },
-  { id: "stuffed-pumpkin", name: "Stuffed pumpkin halves with rice, kale and apple", main: "pumpkin", method: "baked", time: "50 min", serves: "4",
+  { id: "stuffed-pumpkin", img: null, name: "Stuffed pumpkin halves with rice, kale and apple", main: "pumpkin", method: "baked", time: "50 min", serves: "4",
     blurb: "A whole meal served in an edible bowl. Looks like a holiday, cooks like a weeknight.",
     ingredients: ["2 small pie pumpkins, halved and seeded", "1 tbsp olive oil, plus more for brushing", "2 cups cooked brown rice or farro", "2 cups chopped kale", "1 apple, diced", "1/2 onion, diced", "1/3 cup chopped pecans", "1/4 cup crumbled feta or goat cheese (optional)", "Salt, pepper, and a pinch of cinnamon"],
     steps: ["Heat the oven to 400°F.", "Brush the cut sides of the pumpkins with oil and roast cut side down for 30 to 35 minutes, until tender.", "Meanwhile, sauté the onion in oil for 5 minutes, then add the kale and apple for 3 more.", "Stir in the rice, pecans, and seasonings.", "Flip the pumpkins, fill them, top with cheese, and bake 10 more minutes."],
     why: "Whole grain, greens, fruit, and nuts in one dish, with the pumpkin as the bowl.",
     tip: "Make the filling a day ahead. On the night, it's just roast, fill, and bake." },
-  { id: "pumpkin-muffins", name: "Pumpkin oat muffins", main: "pumpkin", method: "baked", time: "35 min", serves: "12 muffins",
+  { id: "pumpkin-muffins", img: null, name: "Pumpkin oat muffins", main: "pumpkin", method: "baked", time: "35 min", serves: "12 muffins",
     blurb: "Moist, spiced, and lightly sweet. Freeze half for busy mornings.",
     ingredients: ["1 1/2 cups whole wheat flour", "1 cup rolled oats", "1 tsp baking soda", "1 tsp baking powder", "2 tsp pumpkin pie spice", "1/2 tsp salt", "1 1/4 cups pumpkin puree", "2 eggs", "1/2 cup maple syrup or honey", "1/3 cup oil", "1/2 cup milk"],
     steps: ["Heat the oven to 375°F and grease or line a 12-cup muffin tin.", "Mix the flour, oats, baking soda, baking powder, spice, and salt.", "In another bowl, whisk the pumpkin, eggs, syrup, oil, and milk.", "Fold the wet into the dry just until no flour shows.", "Fill the cups about 3/4 full and bake 18 to 22 minutes, until a toothpick comes out clean."],
     why: "Whole wheat and oats give more fiber than a bakery muffin, with much less sugar.",
     tip: "Freeze extras in a bag and thaw one overnight on the counter." },
-  { id: "pumpkin-seeds", name: "Toasted pumpkin seeds", main: "pumpkin", method: "baked", time: "35 min", serves: "About 1 cup",
+  { id: "pumpkin-seeds", img: null, name: "Toasted pumpkin seeds", main: "pumpkin", method: "baked", time: "35 min", serves: "About 1 cup",
     blurb: "The part of the pumpkin most people throw away, and the best snack in it.",
     ingredients: ["Seeds from 1 pumpkin (about 1 cup)", "1 tsp olive oil", "1/2 tsp salt", "Optional: cinnamon, chili powder, or garlic powder"],
     steps: ["Rinse the seeds in a colander and pull off the stringy bits.", "Pat them completely dry with a towel.", "Heat the oven to 325°F.", "Toss with oil, salt, and any seasoning, and spread thin on a baking sheet.", "Bake 20 to 30 minutes, stirring every 10, until golden and crisp."],
@@ -873,44 +911,121 @@ const RECIPES = [
     tip: "The drier the seeds go in, the crunchier they come out." },
  
   /* ----- Lightly cooked ----- */
-  { id: "garlic-kale", name: "Garlicky sautéed kale", main: "kale", method: "light", time: "10 min", serves: "4",
+  { id: "garlic-kale", img: null, name: "Garlicky sautéed kale", main: "kale", method: "light", time: "10 min", serves: "4",
     blurb: "A big pile of greens becomes an easy side in five minutes.",
     ingredients: ["1 large bunch kale, stems removed, chopped", "1 tbsp olive oil", "3 garlic cloves, sliced", "2 tbsp water or broth", "Squeeze of lemon", "Pinch of red pepper flakes and salt"],
     steps: ["Heat the oil in a large skillet over medium heat.", "Add the garlic and pepper flakes and stir for 30 seconds.", "Add the kale and water and toss for 3 to 5 minutes, just until wilted and bright green.", "Finish with lemon and salt."],
     why: "Brief cooking keeps the color and much of the vitamin C.",
     tip: "Stop while it's bright green. Overcooked kale turns olive-drab and bitter." },
-  { id: "steamed-sweet-potato", name: "Steamed sweet potato with lime and chili", main: "sweetpotato", method: "light", time: "15 min", serves: "4",
+  { id: "steamed-sweet-potato", img: null, name: "Steamed sweet potato with lime and chili", main: "sweetpotato", method: "light", time: "15 min", serves: "4",
     blurb: "Gentle steaming, then a hit of lime and chili. Quick and clean.",
     ingredients: ["2 medium sweet potatoes, peeled, 1-inch cubes", "Juice of 1 lime", "1 tbsp olive oil or butter", "Pinch of chili powder", "Salt", "Chopped cilantro or green onion"],
     steps: ["Steam the cubes in a basket over simmering water for 10 to 12 minutes, until just tender.", "Toss with lime, oil, chili, and salt.", "Top with cilantro or green onion."],
     why: "Steaming is one of the gentlest ways to cook, so more of the water-soluble vitamins stay in the food.",
     tip: "Mash leftovers with a splash of orange juice for a quick next-day side." },
-  { id: "sweet-potato-skillet", name: "Sweet potato and kale breakfast skillet", main: "sweetpotato", method: "light", time: "25 min", serves: "2 to 3",
+  { id: "sweet-potato-skillet", img: null, name: "Sweet potato and kale breakfast skillet", main: "sweetpotato", method: "light", time: "25 min", serves: "2 to 3",
     blurb: "One pan, eggs on top. Works for breakfast or a fast supper.",
     ingredients: ["1 large sweet potato, 1/2-inch cubes", "1 tbsp oil", "1/2 onion, diced", "1 bell pepper, diced", "2 cups chopped kale", "4 eggs", "Salt, pepper, and smoked paprika"],
     steps: ["Cook the sweet potato in the oil, covered, over medium heat for 8 to 10 minutes, stirring now and then.", "Add the onion and pepper and cook 4 minutes.", "Stir in the kale for 2 minutes.", "Make 4 wells, crack in the eggs, cover, and cook 4 to 6 minutes until the whites are set."],
     why: "Eggs add protein, and sweet potato gives slow-burning energy and fiber.",
     tip: "A splash of water under the lid helps the sweet potato cook through." },
-  { id: "pumpkin-bean-soup", name: "Pumpkin and white bean soup", main: "pumpkin", method: "light", time: "30 min", serves: "4 to 6",
+  { id: "pumpkin-bean-soup", img: null, name: "Pumpkin and white bean soup", main: "pumpkin", method: "light", time: "30 min", serves: "4 to 6",
     blurb: "Creamy without cream, and hearty enough to be supper on its own.",
     ingredients: ["1 tbsp olive oil", "1 onion, chopped", "2 garlic cloves, minced", "3 cups pumpkin cubes (or a 15-oz can of puree)", "1 can white beans, rinsed", "4 cups low-sodium vegetable broth", "1 tsp dried thyme or sage", "2 cups chopped kale", "Salt and pepper"],
     steps: ["Soften the onion in oil for 5 minutes, then add the garlic for 1 minute.", "Add the pumpkin, beans, broth, and herbs.", "Simmer 15 to 20 minutes, until the pumpkin is tender.", "Blend or mash about half the soup for a creamy body.", "Stir in the kale for the last 2 to 3 minutes."],
     why: "Beans add protein and fiber, so this is a full meal; pumpkin adds vitamin A and potassium.",
     tip: "Freezes well for up to 3 months." },
-  { id: "pumpkin-curry", name: "Quick pumpkin coconut curry", main: "pumpkin", method: "light", time: "30 min", serves: "4",
+  { id: "pumpkin-curry", img: null, name: "Quick pumpkin coconut curry", main: "pumpkin", method: "light", time: "30 min", serves: "4",
     blurb: "Warm spices, chickpeas, and greens over brown rice. Works with pumpkin, sweet potato, or both.",
     ingredients: ["1 tbsp oil", "1 onion, chopped", "1 tbsp grated fresh ginger", "2 garlic cloves", "2 tbsp curry powder or red curry paste", "4 cups pumpkin or sweet potato cubes", "1 can (15 oz) light coconut milk", "1 can chickpeas, rinsed", "1/2 cup water", "2 cups kale or spinach", "1 lime", "Brown rice to serve"],
     steps: ["Soften the onion in oil for 5 minutes.", "Add the ginger, garlic, and curry and stir for 1 minute.", "Add the pumpkin, coconut milk, chickpeas, and water, and simmer 15 minutes until tender.", "Stir in the greens for 2 minutes.", "Finish with lime juice and salt, and serve over rice."],
     why: "Ginger and spices add flavor without much salt, and chickpeas add protein and fiber.",
     tip: "Tastes even better the next day." },
-  { id: "sweet-potato-apple-saute", name: "Sweet potato and apple sauté", main: "sweetpotato", method: "light", time: "20 min", serves: "4",
+  { id: "sweet-potato-apple-saute", img: null, name: "Sweet potato and apple sauté", main: "sweetpotato", method: "light", time: "20 min", serves: "4",
     blurb: "A sweet side with no added sugar. Great next to pork, chicken, or eggs.",
     ingredients: ["2 sweet potatoes, small dice", "2 apples, diced", "1 tbsp butter or oil", "2 tbsp water", "1/2 tsp cinnamon", "Pinch of salt", "Chopped pecans"],
     steps: ["Cook the sweet potato in the butter with the water, covered, over medium heat for 8 minutes.", "Add the apples and cinnamon and cook 4 to 5 minutes, until the apples are tender but still hold their shape.", "Season with salt and top with pecans."],
     why: "Naturally sweet, and the apples add pectin, a fiber that's good for your gut.",
-    tip: "Local apples are in season in the fall. Scott's Orchard in Hazel Green grows them; call ahead." }
+    tip: "Local apples are in season in the fall. Scott's Orchard in Hazel Green grows them; call ahead." },
+
+  /* ----- Apples and carrots, raw ----- */
+  { id: "apple-carrot-raisin-slaw", img: null, name: "Apple, carrot and raisin slaw", main: "applecarrot", method: "raw", time: "10 min", serves: "4",
+    blurb: "The classic lunchroom salad with a light lemon dressing instead of mayonnaise.",
+    ingredients: ["3 carrots, grated", "2 crisp apples, grated or cut in matchsticks", "1/3 cup raisins", "Juice of 1 lemon", "1 tsp maple syrup", "Pinch of cinnamon"],
+    steps: ["Grate the apples into the lemon juice right away so they stay light.", "Add the carrots, raisins, maple syrup, and cinnamon, toss, and chill 10 minutes."],
+    why: "Carrots bring beta-carotene, apples bring pectin fiber, and there's no heavy dressing.",
+    tip: "Leave the apple peel on for more fiber and color." },
+  { id: "apple-carrot-beet-salad", img: null, name: "Raw apple, carrot and beet salad", main: "applecarrot", method: "raw", time: "15 min", serves: "4",
+    blurb: "Three grated roots and fruits in red, orange, and green. Bright to look at and to eat.",
+    ingredients: ["2 carrots, grated", "1 raw beet, peeled and grated", "1 tart green apple, grated", "Juice of 1 orange", "1 tbsp apple cider vinegar", "2 tbsp chopped parsley or mint"],
+    steps: ["Grate the beet last and keep it separate so it doesn't stain everything pink.", "Arrange in sections, pour over the orange juice and vinegar, add herbs, and toss at the table."],
+    why: "Raw beets keep their folate, which cooking reduces, and carry nitrates linked to healthy blood pressure.",
+    tip: "Rub your hands with lemon juice after grating beets to lift the stain." },
+  { id: "apple-carrot-celery-crunch", img: null, name: "Apple, carrot and celery crunch salad", main: "applecarrot", method: "raw", time: "15 min", serves: "4",
+    blurb: "A lighter Waldorf-style salad. Every bite crunches.",
+    ingredients: ["2 apples, diced", "2 carrots, sliced into thin coins", "2 celery stalks, thinly sliced", "1/3 cup chopped walnuts", "1/4 cup raisins or dried cranberries", "1/4 cup lemon tahini dressing (see Dressings)"],
+    steps: ["Toss everything together.", "Add the dressing just before serving."],
+    why: "Celery and carrots add crunch and water for very few calories, and walnuts add omega-3 fats.",
+    tip: "Use a vegetable peeler to make carrot ribbons if you don't want to chop." },
+  { id: "apple-carrot-bites", img: null, name: "No-bake apple carrot oat bites", main: "applecarrot", method: "raw", time: "20 min", serves: "About 16 bites",
+    blurb: "Like carrot cake rolled into a ball. A lunch box snack that needs no oven.",
+    ingredients: ["1 cup rolled oats", "8 soft pitted dates", "1/2 cup finely grated carrot", "1/2 cup grated apple, squeezed dry", "2 tbsp peanut or almond butter", "1 tsp cinnamon"],
+    steps: ["Pulse the oats in a food processor, then add the dates and nut butter and pulse into a sticky mix.", "Pulse in the carrot, apple, and cinnamon.", "Roll into 1-inch balls and chill 30 minutes."],
+    why: "Dates sweeten without added sugar, and oats and nut butter make the bites filling.",
+    tip: "If the dates are firm, soak them 10 minutes in warm water first." },
+  { id: "apple-carrot-bircher", img: null, name: "Apple carrot overnight muesli", main: "applecarrot", method: "raw", time: "10 min + overnight", serves: "2",
+    blurb: "Soaked oats with grated apple and carrot. Breakfast that's waiting for you.",
+    ingredients: ["1 cup rolled oats", "1 apple, grated with the peel", "1 small carrot, finely grated", "1 1/2 cups unsweetened soy or oat milk", "1 tbsp maple syrup", "1/2 tsp cinnamon"],
+    steps: ["Stir everything together in a bowl or two jars.", "Refrigerate overnight and loosen with a splash of milk in the morning."],
+    why: "Soaking makes oats easy to digest, and the apple and carrot add fiber and vitamins without cooking.",
+    tip: "Keeps 3 days in the fridge. Make a double batch on Sunday." },
+
+  /* ----- Banana and mango ----- */
+  { id: "mango-banana-green-smoothie", img: null, name: "Mango banana green smoothie", main: "tropical", method: "raw", time: "5 min", serves: "2",
+    blurb: "Sweet enough that nobody notices the kale. A good first step for picky eaters.",
+    ingredients: ["1 ripe banana, frozen in chunks", "1 cup frozen mango chunks", "1 cup kale leaves, stems removed", "1 1/2 cups unsweetened soy milk or water"],
+    steps: ["Pour in the liquid, then add the kale and fruit.", "Blend until completely smooth, about 1 minute."],
+    why: "Mango and kale both bring vitamin C and beta-carotene; banana adds potassium and creaminess.",
+    tip: "Peel and freeze overripe bananas in chunks. They make any smoothie thick and cold." },
+  { id: "mango-salsa", img: null, name: "Fresh mango salsa", main: "tropical", method: "raw", time: "15 min", serves: "4 to 6",
+    blurb: "Sweet and sour with fresh lime. Great with chips, beans, or the sweet potato bar.",
+    ingredients: ["2 ripe mangoes, diced", "1/2 red bell pepper, diced", "1/4 red onion, finely diced", "1/4 cup chopped cilantro", "Juice of 1 lime", "Pinch of salt"],
+    steps: ["Dice everything about the size of a pea.", "Stir with the lime and salt and let it sit 10 minutes."],
+    why: "Mango and red pepper together pack a lot of vitamin C, with no oil or added sugar.",
+    tip: "A ripe mango gives a little when pressed and smells sweet at the stem end." },
+  { id: "mango-banana-nice-cream", img: null, name: "Banana mango nice cream", main: "tropical", method: "raw", time: "10 min", serves: "2 to 3",
+    blurb: "Soft-serve made from nothing but frozen fruit.",
+    ingredients: ["2 ripe bananas, sliced and frozen", "1 cup frozen mango chunks", "A splash of plant milk, only if needed"],
+    steps: ["Let the frozen fruit sit 5 minutes.", "Blend or process, scraping down the sides, until smooth like soft-serve."],
+    why: "All the sweetness comes from fruit, with fiber and potassium a bowl of ice cream doesn't have.",
+    tip: "A food processor handles frozen fruit better than most blenders." },
+  { id: "mango-chia-pudding", img: null, name: "Mango banana chia pudding", main: "tropical", method: "raw", time: "10 min + 4 hrs", serves: "3",
+    blurb: "A creamy make-ahead breakfast or dessert in a jar.",
+    ingredients: ["1/4 cup chia seeds", "1 cup light coconut milk or soy milk", "1 ripe banana, mashed", "1 cup diced mango"],
+    steps: ["Whisk the chia, milk, and banana. Wait 5 minutes and whisk again so it doesn't clump.", "Chill at least 4 hours, then top with mango."],
+    why: "Chia seeds bring fiber and plant omega-3 fats; banana sweetens it with no added sugar.",
+    tip: "Keeps 3 days in the fridge. Add the mango the day you eat it." },
+  { id: "mango-carrot-lime-salad", img: null, name: "Mango, carrot and cucumber salad", main: "tropical", method: "raw", time: "15 min", serves: "4",
+    blurb: "Crunchy carrot and cucumber with sweet mango and lime.",
+    ingredients: ["1 large mango, cut in thin strips", "2 carrots, cut in ribbons with a peeler", "1 cucumber, thinly sliced", "2 tbsp chopped mint or cilantro", "Juice of 1 lime", "Pinch of salt"],
+    steps: ["Toss everything together.", "Serve right away."],
+    why: "Lots of color means lots of different plant compounds, and the salad is oil-free.",
+    tip: "Top with chopped peanuts, or pair it with the mango lime dressing." },
+  { id: "banana-oat-cookies", img: null, name: "Banana oat breakfast cookies", main: "tropical", method: "baked", time: "25 min", serves: "About 14 cookies",
+    blurb: "Two main ingredients, no flour, no added sugar. Soft and chewy.",
+    ingredients: ["2 very ripe bananas", "1 1/2 cups rolled oats", "1/3 cup chopped dried mango or raisins", "1/4 cup chopped pecans", "1/2 tsp cinnamon", "Pinch of salt"],
+    steps: ["Heat the oven to 350°F and line a baking sheet.", "Mash the bananas well, then stir in everything else.", "Scoop rounded tablespoons onto the sheet and flatten slightly.", "Bake 15 to 18 minutes, until set and golden on the bottom."],
+    why: "Ripe banana sweetens and binds the oats, so there's no butter or sugar to add.",
+    tip: "The browner the banana, the sweeter the cookie." },
+  { id: "cinnamon-bananas", img: null, name: "Warm cinnamon bananas", main: "tropical", method: "light", time: "8 min", serves: "2",
+    blurb: "Bananas warmed in a dry pan until they caramelize. Spoon over oatmeal or yogurt.",
+    ingredients: ["2 firm-ripe bananas, sliced into thick coins", "1/2 tsp cinnamon", "Squeeze of orange or lime juice", "Optional: 1 tsp butter, chopped pecans"],
+    steps: ["Heat a nonstick skillet over medium heat.", "Add the banana coins in one layer (with the butter, if using) and cook 2 minutes a side until golden.", "Sprinkle with cinnamon, add the citrus, and serve warm."],
+    why: "A dessert-like topping with no added sugar, plus potassium and fiber from the fruit.",
+    tip: "Use bananas that are yellow with a few spots. Very soft ones fall apart in the pan." }
 ];
 const R_BY_ID = Object.fromEntries(RECIPES.map(r => [r.id, r]));
+
  
 /* ==================================================================
    Farm-fresh fall menus
@@ -986,6 +1101,7 @@ function drawRecipes() {
   document.getElementById("recipeCount").textContent = vis.length === RECIPES.length ? `Showing all ${vis.length} recipes` : `Showing ${vis.length} of ${RECIPES.length} recipes`;
   document.getElementById("recipeGrid").innerHTML = vis.length ? vis.map(r => `
     <button data-recipe="${r.id}" class="text-left rounded-xl bg-card border border-line border-l-8 p-4 cursor-pointer hover:border-leaf flex flex-col" style="border-left-color:${MAINS[r.main].color}">
+      ${imgBlock(r, "-mx-4 -mt-4 mb-3 rounded-tr-[11px]")}
       <span class="flex flex-wrap items-center gap-2 text-sm">
         <span class="inline-flex items-center gap-1.5 font-semibold">${dot(MAINS[r.main].color, 10)}${MAINS[r.main].name}</span>
         <span class="rounded-full border border-line px-2 py-0.5 text-xs font-semibold text-muted">${METHODS[r.method]}</span>
@@ -997,6 +1113,178 @@ function drawRecipes() {
     : `<div class="rounded-xl border border-dashed border-line p-6 text-center sm:col-span-2 lg:col-span-3"><p class="font-semibold">No recipes match that pair yet.</p><p class="text-muted text-sm mt-1">Pick "All" in one of the filters to see more.</p></div>`;
 }
 drawRecipeFilters(); drawRecipes();
+
+/* ==================================================================
+   Make-your-own dressings, herbs, and blends
+   oilFree: true when the recipe has no added oil.
+   img: set to an image URL to show a photo; leave null to show none.
+   ================================================================== */
+const DRESSINGS = [
+  { id: "lemon-tahini", img: null, name: "Lemon tahini", oilFree: true, time: "5 min", makes: "About 3/4 cup", keeps: "1 week",
+    blurb: "Nutty and tangy. Creamy from sesame paste, with no oil added.",
+    ingredients: ["1/4 cup tahini", "3 tbsp lemon juice", "1 small garlic clove, grated", "4 to 6 tbsp cold water", "1/4 tsp salt", "Optional: 1 tsp maple syrup, pinch of cumin"],
+    steps: ["Whisk the tahini, lemon, garlic, and salt. It will seize and thicken at first.", "Whisk in water a spoonful at a time until it pours like heavy cream."],
+    herbs: "Parsley, mint, or dill stirred in at the end.",
+    goes: ["massaged-kale", "roasted-pumpkin", "sweet-potato-wedges", "stuffed-pumpkin"] },
+  { id: "yogurt-herb", img: null, name: "Creamy herb (ranch-style)", oilFree: true, time: "5 min", makes: "About 1 cup", keeps: "5 days",
+    blurb: "Tastes like ranch, made from plain plant yogurt and fresh herbs.",
+    ingredients: ["3/4 cup plain unsweetened soy or coconut yogurt", "2 to 4 tbsp unsweetened plant milk, to thin", "1 tbsp lemon juice or cider vinegar", "1 tbsp chopped fresh dill (or 1 tsp dried)", "1 tbsp chopped chives or green onion", "1 tbsp chopped parsley", "1/2 tsp garlic powder", "1/4 tsp onion powder", "Salt and black pepper"],
+    steps: ["Stir everything together.", "Thin with plant milk to your liking and chill 15 minutes so the herbs soften."],
+    herbs: "Dill, chives, parsley. Or use 1 tbsp of the ranch-style dry blend below.",
+    goes: ["apple-carrot-celery-crunch", "sweet-potato-kale-slaw", "sweet-potato-bar"] },
+  { id: "orange-miso-ginger", img: null, name: "Orange miso ginger", oilFree: true, time: "5 min", makes: "About 1/2 cup", keeps: "1 week",
+    blurb: "Salty, sweet, and bright. Wakes up any slaw or grain bowl.",
+    ingredients: ["1/3 cup orange juice", "1 tbsp white or yellow miso", "1 tbsp rice vinegar", "1 tsp grated fresh ginger", "1 tsp maple syrup (optional)"],
+    steps: ["Whisk the miso with a little orange juice until smooth.", "Whisk in the rest."],
+    herbs: "Green onion and cilantro.",
+    goes: ["pumpkin-carrot-ginger", "apple-carrot-beet-salad", "mango-carrot-lime-salad"] },
+  { id: "mango-lime", img: null, name: "Mango lime", oilFree: true, time: "5 min", makes: "About 1 cup", keeps: "4 days",
+    blurb: "Blended fruit makes the body, so there's no oil at all.",
+    ingredients: ["1 cup ripe mango chunks", "Juice of 1 to 2 limes", "1 tbsp rice or cider vinegar", "2 tbsp cilantro", "Pinch of chili flakes and salt", "Water to thin"],
+    steps: ["Blend everything until smooth.", "Add water a spoonful at a time until it pours."],
+    herbs: "Cilantro or mint.",
+    goes: ["mango-carrot-lime-salad", "steamed-sweet-potato", "sweet-potato-kale-slaw"] },
+  { id: "honey-mustard-cider", img: null, name: "Maple mustard cider", oilFree: true, time: "3 min", makes: "About 1/2 cup", keeps: "2 weeks",
+    blurb: "A tangy Southern favorite. Applesauce gives it body in place of oil.",
+    ingredients: ["2 tbsp Dijon or stone-ground mustard", "2 tbsp apple cider vinegar", "1 tbsp maple syrup", "3 tbsp unsweetened applesauce", "Pinch of salt and pepper"],
+    steps: ["Shake everything in a jar until smooth."],
+    herbs: "Thyme or chives.",
+    goes: ["apple-carrot-raisin-slaw", "massaged-kale", "pumpkin-apple-salad"] },
+  { id: "peanut-lime", img: null, name: "Peanut lime", oilFree: true, time: "5 min", makes: "About 1/2 cup", keeps: "1 week",
+    blurb: "Rich and salty-sour. Doubles as a dip.",
+    ingredients: ["3 tbsp peanut butter", "2 tbsp lime juice", "1 tbsp soy sauce", "1 tsp maple syrup", "1/2 tsp grated ginger", "3 to 4 tbsp warm water"],
+    steps: ["Whisk until smooth, adding warm water until it pours."],
+    herbs: "Cilantro, mint, or Thai basil.",
+    goes: ["sweet-potato-coins", "mango-carrot-lime-salad", "pumpkin-curry"] },
+  { id: "avocado-green-goddess", img: null, name: "Avocado green goddess", oilFree: true, time: "5 min", makes: "About 1 cup", keeps: "2 days",
+    blurb: "Avocado makes it creamy, and a fistful of herbs makes it green.",
+    ingredients: ["1 ripe avocado", "1/2 cup loosely packed basil", "1/4 cup parsley", "2 tbsp chives", "Juice of 1 lemon", "1 small garlic clove", "1/2 cup water", "1/4 tsp salt"],
+    steps: ["Blend everything until smooth, adding water to thin.", "Press plastic wrap right on the surface to keep it green."],
+    herbs: "Basil, parsley, chives, a little tarragon if you have it.",
+    goes: ["massaged-kale", "sweet-potato-bar", "garlic-kale"] },
+  { id: "lemon-vinaigrette", img: null, name: "Everyday lemon vinaigrette", oilFree: false, time: "3 min", makes: "About 1/2 cup", keeps: "2 weeks",
+    blurb: "The one to memorize: 3 parts oil to 1 part acid, plus mustard to hold it together.",
+    ingredients: ["6 tbsp extra virgin olive oil", "2 tbsp lemon juice", "1 tsp Dijon mustard", "1 tsp maple syrup", "1 small garlic clove, grated", "1/4 tsp salt and black pepper"],
+    steps: ["Put everything in a jar, close it, and shake hard for 20 seconds.", "Taste on a leaf and adjust salt or lemon."],
+    herbs: "Any one: parsley, basil, oregano, or thyme.",
+    goes: ["pumpkin-apple-salad", "massaged-kale", "stuffed-pumpkin"] },
+  { id: "balsamic-maple", img: null, name: "Balsamic maple", oilFree: false, time: "3 min", makes: "About 1/2 cup", keeps: "2 weeks",
+    blurb: "Dark and sweet. Made for fall salads with apples and nuts.",
+    ingredients: ["1/4 cup olive oil", "3 tbsp balsamic vinegar", "1 tbsp maple syrup", "1 tsp Dijon mustard", "Pinch of salt and pepper"],
+    steps: ["Shake in a jar until blended."],
+    herbs: "Rosemary (very finely chopped) or thyme.",
+    goes: ["roasted-pumpkin", "apple-carrot-celery-crunch", "pumpkin-apple-salad"] },
+  { id: "apple-cider-shallot", img: null, name: "Apple cider shallot vinaigrette", oilFree: false, time: "15 min", makes: "About 2/3 cup", keeps: "1 week",
+    blurb: "Soaking the shallot in vinegar first takes away its bite.",
+    ingredients: ["1 small shallot, minced", "3 tbsp apple cider vinegar", "1 tbsp apple juice or cider", "1 tsp Dijon mustard", "1/3 cup olive oil", "Salt and pepper"],
+    steps: ["Soak the shallot in the vinegar and salt for 10 minutes.", "Whisk in the juice and mustard, then the oil in a thin stream."],
+    herbs: "Sage or thyme for fall; chives in spring.",
+    goes: ["apple-carrot-beet-salad", "massaged-kale", "sweet-potato-kale-slaw"] },
+  { id: "parsley-chimichurri", img: null, name: "Parsley chimichurri", oilFree: false, time: "10 min", makes: "About 3/4 cup", keeps: "5 days",
+    blurb: "A bold green herb sauce. Spoon it over roasted vegetables and eggs.",
+    ingredients: ["1 cup packed parsley, finely chopped", "2 tbsp fresh oregano (or 2 tsp dried)", "2 garlic cloves, minced", "3 tbsp red wine vinegar", "1/3 cup olive oil", "Pinch of red pepper flakes", "1/2 tsp salt"],
+    steps: ["Stir the herbs, garlic, vinegar, pepper flakes, and salt.", "Stir in the oil and let it sit 10 minutes before serving."],
+    herbs: "Parsley and oregano are the base. Add cilantro for a twist.",
+    goes: ["sweet-potato-wedges", "roasted-pumpkin", "sweet-potato-skillet"] }
+];
+const D_BY_ID = Object.fromEntries(DRESSINGS.map(d => [d.id, d]));
+const dressingsFor = rid => DRESSINGS.filter(d => d.goes.includes(rid));
+
+const BUILD_STEPS = [
+  ["Pick a base", "Creamy: tahini, plant yogurt, avocado, nut butter, or blended fruit. Classic: olive oil."],
+  ["Add something sour", "Lemon, lime, orange juice, or vinegar (cider, rice, red wine, balsamic)."],
+  ["Balance with a little sweet", "Maple syrup, a date, applesauce, or ripe fruit."],
+  ["Season", "Salt, mustard, garlic, ginger, or miso for depth."],
+  ["Finish with herbs", "Fresh herbs at the end, or a spoonful of one of the blends below."]
+];
+
+const HERBS = [
+  ["Parsley", "Clean and grassy. Goes with almost everything.", "Lemon dressings, chimichurri, roasted vegetables"],
+  ["Cilantro", "Bright and citrusy. Some people taste soap.", "Mango, lime, peanut, sweet potato"],
+  ["Basil", "Sweet and peppery. Bruises easily, so tear it.", "Avocado, tomato, lemon"],
+  ["Dill", "Fresh and a little tangy.", "Creamy dressings, carrots, cucumbers"],
+  ["Chives", "Mild onion flavor with no bite.", "Creamy dressings, eggs, potatoes"],
+  ["Mint", "Cool and sweet.", "Fruit salads, beets, tahini, mango"],
+  ["Oregano", "Strong and earthy. Dried works well.", "Vinaigrettes, chimichurri"],
+  ["Thyme", "Woodsy and gentle. Strip the leaves off the stem.", "Apple cider and balsamic dressings, pumpkin"],
+  ["Sage", "Savory and soft. A little goes far.", "Pumpkin, sweet potato, cider vinaigrette"],
+  ["Rosemary", "Piney and strong. Chop it very fine.", "Balsamic, roasted roots"],
+  ["Ginger", "Warm and zingy. Grate it on a fine grater.", "Miso, peanut, carrots, mango"],
+  ["Garlic", "Grate one small clove; raw garlic gets stronger as it sits.", "Nearly any dressing"]
+];
+
+const BLENDS = [
+  { name: "Ranch-style dry mix", use: "Stir 1 tbsp into 3/4 cup plain plant yogurt for an instant creamy dressing.",
+    mix: ["2 tbsp dried parsley", "1 tbsp dried dill", "1 tbsp dried chives", "2 tsp garlic powder", "2 tsp onion powder", "1 tsp black pepper", "1 tsp salt"] },
+  { name: "Bright and green (fresh)", use: "Chop together and stir into any lemon or yogurt dressing.",
+    mix: ["2 tbsp parsley", "1 tbsp chives", "1 tbsp dill", "1 tsp lemon zest"] },
+  { name: "Italian herb", use: "1 tsp per 1/2 cup vinaigrette, or toss with oil on roasted pumpkin.",
+    mix: ["2 tbsp dried basil", "2 tbsp dried oregano", "1 tbsp dried thyme", "1 tsp garlic powder", "1/2 tsp red pepper flakes"] },
+  { name: "Southwest lime", use: "Add 1 tsp to mango lime dressing, salsa, or the sweet potato bar.",
+    mix: ["2 tsp ground cumin", "2 tsp smoked paprika", "1 tsp chili powder", "1 tsp garlic powder", "1 tsp dried oregano", "Fresh lime zest when you use it"] },
+  { name: "Warm fall spice", use: "For apples, carrots, sweet potato, bananas, and oats. 1/2 tsp at a time.",
+    mix: ["2 tbsp cinnamon", "2 tsp ground ginger", "1 tsp nutmeg", "1/2 tsp allspice", "1/4 tsp cloves"] },
+  { name: "Sesame thyme (za'atar style)", use: "Sprinkle on tahini dressing, yogurt, or roasted vegetables.",
+    mix: ["2 tbsp toasted sesame seeds", "1 tbsp dried thyme", "1 tbsp dried oregano", "2 tsp lemon zest (or sumac, if you have it)", "1/2 tsp salt"] }
+];
+
+const dState = { kind: "all" };
+const dBtns = document.getElementById("dressingBtns");
+function drawDressingFilters() {
+  segBtns(dBtns, [["all", "All"], ["free", "No oil"], ["oil", "With oil"]], dState.kind, "dkind");
+}
+dBtns.addEventListener("click", e => { const b = e.target.closest("[data-dkind]"); if (b) { dState.kind = b.dataset.dkind; drawDressingFilters(); drawDressings(); } });
+function drawDressings() {
+  const vis = DRESSINGS.filter(d => dState.kind === "all" || (dState.kind === "free") === d.oilFree);
+  document.getElementById("dressingCount").textContent = vis.length === DRESSINGS.length ? `Showing all ${vis.length} dressings` : `Showing ${vis.length} of ${DRESSINGS.length} dressings`;
+  document.getElementById("dressingGrid").innerHTML = vis.map(d => `
+    <button data-dressing="${d.id}" class="text-left rounded-xl bg-card border border-line p-4 cursor-pointer hover:border-leaf flex flex-col">
+      ${imgBlock(d, "-mx-4 -mt-4 mb-3 rounded-t-[11px]")}
+      <span class="flex flex-wrap items-center gap-2 text-sm">
+        <span class="rounded-full px-2 py-0.5 text-xs font-semibold ${d.oilFree ? "bg-leaf text-onleaf" : "border border-line text-muted"}">${d.oilFree ? "No oil" : "With olive oil"}</span>
+        <span class="text-muted font-semibold">Keeps ${d.keeps}</span>
+      </span>
+      <span class="mt-2 font-display text-xl leading-tight">${d.name}</span>
+      <span class="mt-1.5 text-muted">${d.blurb}</span>
+      <span class="mt-3 text-sm font-semibold">${d.time}. Makes ${d.makes.toLowerCase()}.</span>
+    </button>`).join("");
+}
+drawDressingFilters(); drawDressings();
+
+document.getElementById("buildSteps").innerHTML = BUILD_STEPS.map(([h, t]) =>
+  `<li><p class="font-semibold leading-snug">${h}</p><p class="mt-0.5 text-muted">${t}</p></li>`).join("");
+document.getElementById("herbGrid").innerHTML = HERBS.map(([h, t, w]) =>
+  `<div class="rounded-lg border border-line bg-card px-4 py-3"><p class="font-semibold">${h}</p><p class="mt-0.5 text-sm text-muted">${t}</p><p class="mt-1.5 text-sm"><span class="font-semibold">Try with:</span> ${w}</p></div>`).join("");
+document.getElementById("blendGrid").innerHTML = BLENDS.map(b =>
+  `<div class="rounded-xl bg-card border-2 border-line p-4">
+    <p class="font-display text-xl leading-tight">${b.name}</p>
+    <ul class="mt-2 grid gap-1 text-sm">${b.mix.map(m => `<li class="flex gap-2"><span aria-hidden="true" class="mt-1.5 h-1.5 w-1.5 rounded-full bg-leaf shrink-0"></span><span>${m}</span></li>`).join("")}</ul>
+    <p class="mt-3 text-sm text-muted">${b.use}</p>
+  </div>`).join("");
+
+function openDressing(id) {
+  const d = D_BY_ID[id]; if (!d) return;
+  const recs = d.goes.map(r => R_BY_ID[r]).filter(Boolean);
+  openDlg(`
+      ${dlgHead(d.name)}
+      <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+        <span class="rounded-full px-3 py-1 font-semibold ${d.oilFree ? "bg-leaf text-onleaf" : "border border-line"}">${d.oilFree ? "No oil" : "With olive oil"}</span>
+        <span class="rounded-full border border-line px-3 py-1 font-semibold">${d.time}</span>
+        <span class="rounded-full border border-line px-3 py-1 font-semibold">Makes ${d.makes.toLowerCase()}</span>
+        <span class="rounded-full border border-line px-3 py-1 font-semibold">Keeps ${d.keeps} in the fridge</span>
+      </div>
+      ${imgBlock(d, "mt-4 rounded-xl border border-line")}
+      <p class="mt-3 text-lg">${d.blurb}</p>
+      <h3 class="mt-5 font-semibold">You'll need</h3>
+      <ul class="mt-2 grid gap-1.5">${d.ingredients.map(i => `<li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 h-2 w-2 rounded-full bg-leaf shrink-0"></span><span>${i}</span></li>`).join("")}</ul>
+      <h3 class="mt-5 font-semibold">How to make it</h3>
+      <ol class="steps mt-3 grid gap-3">${d.steps.map(s => `<li>${s}</li>`).join("")}</ol>
+      <div class="mt-5 rounded-xl bg-sprout/60 border border-line p-4">
+        <p class="font-semibold">Herbs that fit</p>
+        <p class="mt-1">${d.herbs}</p>
+      </div>
+      ${recs.length ? `<h3 class="mt-5 font-semibold">Good on</h3><div class="mt-2 grid gap-2">${recs.map(r => linkBtn(`data-recipe="${r.id}"`, r.name, `${METHODS[r.method]}. ${r.time}.`)).join("")}</div>` : ""}`);
+}
  
 /* ==================================================================
    Grow kale
@@ -1155,11 +1443,14 @@ function openRecipe(id) {
   openDlg(`
       ${dlgHead(r.name)}
       <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
-        <button data-produce="${mm.produce}" class="inline-flex items-center gap-1.5 rounded-full bg-sunsoft border border-ink/40 px-3 font-semibold cursor-pointer">${dot(mm.color, 10)}${mm.name}</button>
+        ${mm.produce
+          ? `<button data-produce="${mm.produce}" class="inline-flex items-center gap-1.5 rounded-full bg-sunsoft border border-ink/40 px-3 font-semibold cursor-pointer">${dot(mm.color, 10)}${mm.name}</button>`
+          : `<span class="inline-flex items-center gap-1.5 rounded-full bg-sunsoft border border-ink/40 px-3 py-1 font-semibold">${dot(mm.color, 10)}${mm.name}</span>`}
         <span class="rounded-full border border-line px-3 py-1 font-semibold">${METHODS[r.method]}</span>
         <span class="rounded-full border border-line px-3 py-1 font-semibold">${r.time}</span>
         <span class="rounded-full border border-line px-3 py-1 font-semibold">Serves ${r.serves}</span>
       </div>
+      ${imgBlock(r, "mt-4 rounded-xl border border-line")}
       <p class="mt-3 text-lg">${r.blurb}</p>
       <h3 class="mt-5 font-semibold">You'll need</h3>
       <ul class="mt-2 grid gap-1.5">${r.ingredients.map(i => `<li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 h-2 w-2 rounded-full bg-leaf shrink-0"></span><span>${i}</span></li>`).join("")}</ul>
@@ -1171,6 +1462,7 @@ function openRecipe(id) {
       </div>
       <h3 class="mt-5 font-semibold">Tip</h3>
       <p class="mt-1">${r.tip}</p>
+      ${dressingsFor(id).length ? `<h3 class="mt-5 font-semibold">Dressings that go with it</h3><div class="mt-2 grid gap-2">${dressingsFor(id).map(d => linkBtn(`data-dressing="${d.id}"`, d.name, d.oilFree ? "No oil" : "With olive oil")).join("")}</div>` : ""}
       ${ms.length ? `<h3 class="mt-5 font-semibold">On these menus</h3><div class="mt-2 grid gap-2">${ms.map(m => linkBtn(`data-menu="${m.id}"`, m.name, `Serves ${m.serves}`)).join("")}</div>` : ""}`);
 }
  
@@ -1197,12 +1489,13 @@ dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
  
 document.addEventListener("click", e => {
   if (e.target.closest("#dlg a[href^='#']")) { dlg.close(); return; }
-  const t = e.target.closest("[data-produce],[data-place],[data-close],[data-filter-markets],[data-recipe],[data-menu]");
+  const t = e.target.closest("[data-produce],[data-place],[data-close],[data-filter-markets],[data-recipe],[data-menu],[data-dressing]");
   if (!t) return;
   if (t.hasAttribute("data-close")) return dlg.close();
   if (t.dataset.produce) return openProduce(t.dataset.produce);
   if (t.dataset.recipe) return openRecipe(t.dataset.recipe);
   if (t.dataset.menu) return openMenu(t.dataset.menu);
+  if (t.dataset.dressing) return openDressing(t.dataset.dressing);
   if (t.hasAttribute("data-filter-markets")) {
     dlg.close();
     const c = cats.find(c => /market/i.test(c)); if (c) state.cat = c;
